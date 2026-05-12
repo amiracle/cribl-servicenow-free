@@ -1,0 +1,80 @@
+in_upwind_alerts:
+  type: collection
+  disabled: true
+  sendToRoutes: true
+  preprocess:
+    disabled: true
+  throttleRatePerSec: "0"
+  breakerRulesets:
+    - Upwind API Ruleset
+  metadata:
+    - name: __packsource
+      value: "'cribl-upwind-rest-io.upwind-alerts'"
+    - name: sourcetype
+      value: "'upwind:alert'"
+    - name: index
+      value: C.vars['default_splunk_index']
+in_upwind_vulnerabilities:
+  type: collection
+  disabled: true
+  sendToRoutes: true
+  preprocess:
+    disabled: true
+  throttleRatePerSec: "0"
+  breakerRulesets:
+    - Upwind API Ruleset
+  metadata:
+    - name: __packsource
+      value: "'cribl-upwind-rest-io.upwind-vulnerabilities'"
+    - name: sourcetype
+      value: "'upwind:vulnerability'"
+    - name: index
+      value: C.vars['default_splunk_index']
+in_upwind_inventory:
+  type: collection
+  disabled: true
+  sendToRoutes: true
+  preprocess:
+    disabled: true
+  throttleRatePerSec: "0"
+  breakerRulesets:
+    - Upwind API Ruleset
+  metadata:
+    - name: __packsource
+      value: "'cribl-upwind-rest-io.upwind-inventory'"
+    - name: sourcetype
+      value: "'upwind:asset'"
+    - name: index
+      value: C.vars['default_splunk_index']
+in_upwind_threats:
+  type: collection
+  disabled: true
+  sendToRoutes: true
+  preprocess:
+    disabled: true
+  throttleRatePerSec: "0"
+  breakerRulesets:
+    - Upwind API Ruleset
+  metadata:
+    - name: __packsource
+      value: "'cribl-upwind-rest-io.upwind-threats'"
+    - name: sourcetype
+      value: "'upwind:threat'"
+    - name: index
+      value: C.vars['default_splunk_index']
+in_upwind_identities:
+  type: collection
+  disabled: true
+  sendToRoutes: true
+  preprocess:
+    disabled: true
+  throttleRatePerSec: "0"
+  breakerRulesets:
+    - Upwind API Ruleset
+  metadata:
+    - name: __packsource
+      value: "'cribl-upwind-rest-io.upwind-identities'"
+    - name: sourcetype
+      value: "'upwind:identity'"
+    - name: index
+      value: C.vars['default_splunk_index']
