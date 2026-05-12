@@ -36,7 +36,13 @@ in_upwind_alerts:
         attribute:
           - nextPage
         maxPages: 100
-      authentication: none
+      authentication: login
+      loginUrl: "'https://auth.upwind.io/oauth/token'"
+      loginBody: "`client_id=${C.vars['upwind_client_id']}&client_secret=${C.vars['upwind_client_secret']}&grant_type=client_credentials&audience=https://api.upwind.io`"
+      tokenRespAttribute: access_token
+      getAuthTokenFromHeader: false
+      authHeaderKey: Authorization
+      authHeaderExpr: "`Bearer ${token}`"
       timeout: 0
       useRoundRobinDns: false
       disableTimeFilter: false
@@ -69,10 +75,10 @@ in_upwind_alerts:
         - name: limit
           value: "'500'"
       collectRequestHeaders:
-        - name: Authorization
-          value: "`Bearer ${C.vars['upwind_api_key']}`"
         - name: Accept
           value: "'application/json'"
+      username: SET_VARIABLE_INSTEAD
+      password: SET_VARIABLE_INSTEAD
     destructive: false
     encoding: utf8
     type: rest
@@ -133,7 +139,13 @@ in_upwind_vulnerabilities:
         attribute:
           - nextPage
         maxPages: 100
-      authentication: none
+      authentication: login
+      loginUrl: "'https://auth.upwind.io/oauth/token'"
+      loginBody: "`client_id=${C.vars['upwind_client_id']}&client_secret=${C.vars['upwind_client_secret']}&grant_type=client_credentials&audience=https://api.upwind.io`"
+      tokenRespAttribute: access_token
+      getAuthTokenFromHeader: false
+      authHeaderKey: Authorization
+      authHeaderExpr: "`Bearer ${token}`"
       timeout: 0
       useRoundRobinDns: false
       disableTimeFilter: false
@@ -164,10 +176,10 @@ in_upwind_vulnerabilities:
         - name: limit
           value: "'500'"
       collectRequestHeaders:
-        - name: Authorization
-          value: "`Bearer ${C.vars['upwind_api_key']}`"
         - name: Accept
           value: "'application/json'"
+      username: SET_VARIABLE_INSTEAD
+      password: SET_VARIABLE_INSTEAD
     destructive: false
     encoding: utf8
     type: rest
@@ -225,7 +237,13 @@ in_upwind_inventory:
         attribute:
           - nextPage
         maxPages: 100
-      authentication: none
+      authentication: login
+      loginUrl: "'https://auth.upwind.io/oauth/token'"
+      loginBody: "`client_id=${C.vars['upwind_client_id']}&client_secret=${C.vars['upwind_client_secret']}&grant_type=client_credentials&audience=https://api.upwind.io`"
+      tokenRespAttribute: access_token
+      getAuthTokenFromHeader: false
+      authHeaderKey: Authorization
+      authHeaderExpr: "`Bearer ${token}`"
       timeout: 0
       useRoundRobinDns: false
       disableTimeFilter: false
@@ -254,10 +272,10 @@ in_upwind_inventory:
         - name: limit
           value: "'500'"
       collectRequestHeaders:
-        - name: Authorization
-          value: "`Bearer ${C.vars['upwind_api_key']}`"
         - name: Accept
           value: "'application/json'"
+      username: SET_VARIABLE_INSTEAD
+      password: SET_VARIABLE_INSTEAD
     destructive: false
     encoding: utf8
     type: rest
@@ -318,7 +336,13 @@ in_upwind_threats:
         attribute:
           - nextPage
         maxPages: 100
-      authentication: none
+      authentication: login
+      loginUrl: "'https://auth.upwind.io/oauth/token'"
+      loginBody: "`client_id=${C.vars['upwind_client_id']}&client_secret=${C.vars['upwind_client_secret']}&grant_type=client_credentials&audience=https://api.upwind.io`"
+      tokenRespAttribute: access_token
+      getAuthTokenFromHeader: false
+      authHeaderKey: Authorization
+      authHeaderExpr: "`Bearer ${token}`"
       timeout: 0
       useRoundRobinDns: false
       disableTimeFilter: false
@@ -351,10 +375,10 @@ in_upwind_threats:
         - name: limit
           value: "'500'"
       collectRequestHeaders:
-        - name: Authorization
-          value: "`Bearer ${C.vars['upwind_api_key']}`"
         - name: Accept
           value: "'application/json'"
+      username: SET_VARIABLE_INSTEAD
+      password: SET_VARIABLE_INSTEAD
     destructive: false
     encoding: utf8
     type: rest
@@ -412,7 +436,13 @@ in_upwind_identities:
         attribute:
           - nextPage
         maxPages: 100
-      authentication: none
+      authentication: login
+      loginUrl: "'https://auth.upwind.io/oauth/token'"
+      loginBody: "`client_id=${C.vars['upwind_client_id']}&client_secret=${C.vars['upwind_client_secret']}&grant_type=client_credentials&audience=https://api.upwind.io`"
+      tokenRespAttribute: access_token
+      getAuthTokenFromHeader: false
+      authHeaderKey: Authorization
+      authHeaderExpr: "`Bearer ${token}`"
       timeout: 0
       useRoundRobinDns: false
       disableTimeFilter: false
@@ -441,10 +471,10 @@ in_upwind_identities:
         - name: limit
           value: "'500'"
       collectRequestHeaders:
-        - name: Authorization
-          value: "`Bearer ${C.vars['upwind_api_key']}`"
         - name: Accept
           value: "'application/json'"
+      username: SET_VARIABLE_INSTEAD
+      password: SET_VARIABLE_INSTEAD
     destructive: false
     encoding: utf8
     type: rest

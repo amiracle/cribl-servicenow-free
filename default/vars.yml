@@ -1,8 +1,3 @@
-upwind_api_key:
-  type: encryptedString
-  lib: custom
-  value: "YOUR_UPWIND_API_KEY"
-  description: "REQUIRED: Your Upwind API Key. Generate from Upwind Console > Settings > API Keys."
 upwind_client_id:
   type: string
   lib: custom
@@ -17,7 +12,7 @@ upwind_organization_id:
   type: string
   lib: custom
   value: "'YOUR_UPWIND_ORGANIZATION_ID'"
-  description: "REQUIRED: Your Upwind Organization ID. Found in Upwind Console > Settings > Organization."
+  description: "REQUIRED: Your Upwind Organization ID. Found in the Upwind console URL or Settings."
 default_splunk_index:
   type: string
   lib: custom
