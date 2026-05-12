@@ -1,0 +1,14 @@
+{
+  "name": "cribl-upwind-rest-io",
+  "version": "1.0.0",
+  "minLogStreamVersion": "4.17.0",
+  "author": "Cribl Packs Team",
+  "description": "Collector pack to process data from the Upwind Security REST API.",
+  "displayName": "Upwind Security Rest Collector IO",
+  "tags": {
+    "streamtags": ["upwind", "security", "cnapp"],
+    "dataType": ["logs"],
+    "useCase": ["reduction", "routing"]
+  },
+  "exports": []
+}
