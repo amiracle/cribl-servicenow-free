@@ -36,7 +36,7 @@ in_upwind_alerts:
         attribute:
           - nextPage
         maxPages: 100
-      authentication: authToken
+      authentication: none
       timeout: 0
       useRoundRobinDns: false
       disableTimeFilter: false
@@ -60,8 +60,6 @@ in_upwind_alerts:
         retryHeaderName: retry-after
       __scheduling:
         stateTracking: {}
-      authHeaderKey: Authorization
-      authHeaderExpr: "`Bearer ${C.vars['upwind_api_key']}`"
       collectUrl: "`https://api.upwind.io/v1/organizations/${C.vars['upwind_organization_id']}/alerts`"
       collectRequestParams:
         - name: from
@@ -71,10 +69,10 @@ in_upwind_alerts:
         - name: limit
           value: "'500'"
       collectRequestHeaders:
+        - name: Authorization
+          value: "`Bearer ${C.vars['upwind_api_key']}`"
         - name: Accept
           value: "'application/json'"
-      username: SET_VARIABLE_INSTEAD
-      password: SET_VARIABLE_INSTEAD
     destructive: false
     encoding: utf8
     type: rest
@@ -135,7 +133,7 @@ in_upwind_vulnerabilities:
         attribute:
           - nextPage
         maxPages: 100
-      authentication: authToken
+      authentication: none
       timeout: 0
       useRoundRobinDns: false
       disableTimeFilter: false
@@ -159,8 +157,6 @@ in_upwind_vulnerabilities:
         retryHeaderName: retry-after
       __scheduling:
         stateTracking: {}
-      authHeaderKey: Authorization
-      authHeaderExpr: "`Bearer ${C.vars['upwind_api_key']}`"
       collectUrl: "`https://api.upwind.io/v1/organizations/${C.vars['upwind_organization_id']}/vulnerabilities`"
       collectRequestParams:
         - name: updatedAfter
@@ -168,10 +164,10 @@ in_upwind_vulnerabilities:
         - name: limit
           value: "'500'"
       collectRequestHeaders:
+        - name: Authorization
+          value: "`Bearer ${C.vars['upwind_api_key']}`"
         - name: Accept
           value: "'application/json'"
-      username: SET_VARIABLE_INSTEAD
-      password: SET_VARIABLE_INSTEAD
     destructive: false
     encoding: utf8
     type: rest
@@ -229,7 +225,7 @@ in_upwind_inventory:
         attribute:
           - nextPage
         maxPages: 100
-      authentication: authToken
+      authentication: none
       timeout: 0
       useRoundRobinDns: false
       disableTimeFilter: false
@@ -253,17 +249,15 @@ in_upwind_inventory:
         retryHeaderName: retry-after
       __scheduling:
         stateTracking: {}
-      authHeaderKey: Authorization
-      authHeaderExpr: "`Bearer ${C.vars['upwind_api_key']}`"
       collectUrl: "`https://api.upwind.io/v1/organizations/${C.vars['upwind_organization_id']}/inventory/assets`"
       collectRequestParams:
         - name: limit
           value: "'500'"
       collectRequestHeaders:
+        - name: Authorization
+          value: "`Bearer ${C.vars['upwind_api_key']}`"
         - name: Accept
           value: "'application/json'"
-      username: SET_VARIABLE_INSTEAD
-      password: SET_VARIABLE_INSTEAD
     destructive: false
     encoding: utf8
     type: rest
@@ -324,7 +318,7 @@ in_upwind_threats:
         attribute:
           - nextPage
         maxPages: 100
-      authentication: authToken
+      authentication: none
       timeout: 0
       useRoundRobinDns: false
       disableTimeFilter: false
@@ -348,8 +342,6 @@ in_upwind_threats:
         retryHeaderName: retry-after
       __scheduling:
         stateTracking: {}
-      authHeaderKey: Authorization
-      authHeaderExpr: "`Bearer ${C.vars['upwind_api_key']}`"
       collectUrl: "`https://api.upwind.io/v1/organizations/${C.vars['upwind_organization_id']}/threats`"
       collectRequestParams:
         - name: from
@@ -359,10 +351,10 @@ in_upwind_threats:
         - name: limit
           value: "'500'"
       collectRequestHeaders:
+        - name: Authorization
+          value: "`Bearer ${C.vars['upwind_api_key']}`"
         - name: Accept
           value: "'application/json'"
-      username: SET_VARIABLE_INSTEAD
-      password: SET_VARIABLE_INSTEAD
     destructive: false
     encoding: utf8
     type: rest
@@ -420,7 +412,7 @@ in_upwind_identities:
         attribute:
           - nextPage
         maxPages: 100
-      authentication: authToken
+      authentication: none
       timeout: 0
       useRoundRobinDns: false
       disableTimeFilter: false
@@ -444,17 +436,15 @@ in_upwind_identities:
         retryHeaderName: retry-after
       __scheduling:
         stateTracking: {}
-      authHeaderKey: Authorization
-      authHeaderExpr: "`Bearer ${C.vars['upwind_api_key']}`"
       collectUrl: "`https://api.upwind.io/v1/organizations/${C.vars['upwind_organization_id']}/identities`"
       collectRequestParams:
         - name: limit
           value: "'500'"
       collectRequestHeaders:
+        - name: Authorization
+          value: "`Bearer ${C.vars['upwind_api_key']}`"
         - name: Accept
           value: "'application/json'"
-      username: SET_VARIABLE_INSTEAD
-      password: SET_VARIABLE_INSTEAD
     destructive: false
     encoding: utf8
     type: rest
