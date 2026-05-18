@@ -1,0 +1,171 @@
+{
+  "name": "x_cribl_routing_rules",
+  "label": "Cribl Routing Rule",
+  "plural_label": "Cribl Routing Rules",
+  "columns": [
+    {
+      "name": "name",
+      "label": "Rule Name",
+      "type": "string",
+      "max_length": 128,
+      "mandatory": true,
+      "description": "Human-readable name for this routing rule"
+    },
+    {
+      "name": "order",
+      "label": "Evaluation Order",
+      "type": "integer",
+      "default": 100,
+      "mandatory": true,
+      "description": "Lower numbers are evaluated first"
+    },
+    {
+      "name": "active",
+      "label": "Active",
+      "type": "boolean",
+      "default": true
+    },
+    {
+      "name": "source_type",
+      "label": "Source Type Filter",
+      "type": "choice",
+      "choices": [
+        { "value": "any", "label": "Any" },
+        { "value": "alert", "label": "Security Alert" },
+        { "value": "threat", "label": "Runtime Threat" },
+        { "value": "vulnerability", "label": "Vulnerability" }
+      ],
+      "default": "any"
+    },
+    {
+      "name": "min_severity",
+      "label": "Minimum Severity",
+      "type": "integer",
+      "choices": [
+        { "value": 1, "label": "Critical" },
+        { "value": 2, "label": "High" },
+        { "value": 3, "label": "Medium" },
+        { "value": 4, "label": "Low" },
+        { "value": 5, "label": "Any" }
+      ],
+      "default": 5,
+      "description": "Rule matches if case severity is this value or higher (lower number = higher severity)"
+    },
+    {
+      "name": "cloud_provider",
+      "label": "Cloud Provider Filter",
+      "type": "choice",
+      "choices": [
+        { "value": "any", "label": "Any" },
+        { "value": "aws", "label": "AWS" },
+        { "value": "gcp", "label": "GCP" },
+        { "value": "azure", "label": "Azure" }
+      ],
+      "default": "any"
+    },
+    {
+      "name": "resource_type_pattern",
+      "label": "Resource Type Pattern",
+      "type": "string",
+      "max_length": 256,
+      "description": "Regex pattern to match resource types (leave empty for any)"
+    },
+    {
+      "name": "environment",
+      "label": "Environment Filter",
+      "type": "choice",
+      "choices": [
+        { "value": "any", "label": "Any" },
+        { "value": "production", "label": "Production" },
+        { "value": "staging", "label": "Staging" },
+        { "value": "development", "label": "Development" }
+      ],
+      "default": "any"
+    },
+    {
+      "name": "assignment_group",
+      "label": "Assignment Group",
+      "type": "reference",
+      "reference_table": "sys_user_group",
+      "mandatory": true,
+      "description": "Group to assign matching cases to"
+    },
+    {
+      "name": "priority_boost",
+      "label": "Priority Boost",
+      "type": "integer",
+      "default": 0,
+      "min_value": -20,
+      "max_value": 20,
+      "description": "Additive modifier to the computed impact score"
+    },
+    {
+      "name": "description",
+      "label": "Description",
+      "type": "string",
+      "max_length": 512
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx_active_order",
+      "columns": ["active", "order"]
+    }
+  ],
+  "default_data": [
+    {
+      "name": "Critical Production Threats",
+      "order": 10,
+      "active": true,
+      "source_type": "threat",
+      "min_severity": 1,
+      "cloud_provider": "any",
+      "environment": "production",
+      "assignment_group": "Security Incident Response",
+      "priority_boost": 15,
+      "description": "Route critical production threats to incident response team"
+    },
+    {
+      "name": "High Severity Alerts",
+      "order": 20,
+      "active": true,
+      "source_type": "alert",
+      "min_severity": 2,
+      "cloud_provider": "any",
+      "environment": "any",
+      "assignment_group": "Cloud Security Operations",
+      "priority_boost": 5,
+      "description": "Route high+ severity alerts to cloud security ops"
+    },
+    {
+      "name": "Critical Vulnerabilities",
+      "order": 30,
+      "active": true,
+      "source_type": "vulnerability",
+      "min_severity": 1,
+      "cloud_provider": "any",
+      "environment": "production",
+      "assignment_group": "Vulnerability Management",
+      "priority_boost": 10,
+      "description": "Route critical production vulnerabilities to vuln management"
+    },
+    {
+      "name": "Default Catch-All",
+      "order": 999,
+      "active": true,
+      "source_type": "any",
+      "min_severity": 5,
+      "cloud_provider": "any",
+      "environment": "any",
+      "assignment_group": "Security Operations",
+      "priority_boost": 0,
+      "description": "Default fallback: route to Security Operations"
+    }
+  ],
+  "acls": {
+    "create": ["x_cribl_alert_intel.admin"],
+    "read": ["x_cribl_alert_intel.admin", "x_cribl_alert_intel.analyst"],
+    "write": ["x_cribl_alert_intel.admin"],
+    "delete": ["x_cribl_alert_intel.admin"]
+  }
+}

@@ -1,0 +1,72 @@
+id: cribl_to_servicenow
+type: webhook
+description: >
+  Sends enriched security events from Cribl Stream to the ServiceNow
+  Cribl Alert Intelligence app for deduplication, scoring, and case management.
+
+output:
+  systemFields:
+    - cribl_pipe
+  type: webhook
+  url: "`https://${C.vars['snow_instance']}.service-now.com/api/x_cribl/v1/ingest`"
+  method: POST
+  format: json_array
+  flushPeriodSec: 30
+  maxPayloadSizeKB: 1024
+  maxPayloadEvents: 50
+  concurrency: 2
+  headers:
+    - name: Content-Type
+      value: "'application/json'"
+    - name: Authorization
+      value: "`Basic ${C.vars['snow_api_credentials']}`"
+    - name: X-Cribl-Signature
+      value: "`${C.Crypto.hmac(JSON.stringify(__e), C.vars['snow_hmac_secret'], 'sha256')}`"
+    - name: X-Cribl-Source
+      value: "'cribl-stream'"
+  timeoutSec: 30
+  rejectUnauthorized: true
+  retryRules:
+    type: backoff
+    interval: 2000
+    limit: 3
+    multiplier: 2
+    maxIntervalMs: 30000
+    codes:
+      - 429
+      - 500
+      - 502
+      - 503
+    enableHeader: true
+    retryHeaderName: retry-after
+  onBackpressure: block
+  authType: none
+
+variables:
+  - name: snow_instance
+    type: string
+    description: "ServiceNow instance name (e.g., 'dev12345' for dev12345.service-now.com)"
+    required: true
+  - name: snow_api_credentials
+    type: encrypted
+    description: "Base64-encoded username:password for ServiceNow API user (role: x_cribl_alert_intel.api)"
+    required: true
+  - name: snow_hmac_secret
+    type: encrypted
+    description: "Shared HMAC secret — must match x_cribl.hmac_secret system property in ServiceNow"
+    required: true
+
+filters:
+  - description: "Only send high-value events (severity Critical/High or source_type threat)"
+    condition: >
+      severity === 'CRITICAL' || severity === 'HIGH' ||
+      source_type === 'threat' ||
+      (source_type === 'vulnerability' && cvssScore >= 7.0)
+
+notes: |
+  Setup:
+  1. Create a ServiceNow user with role 'x_cribl_alert_intel.api'
+  2. Base64-encode 'username:password' and set as snow_api_credentials
+  3. Generate an HMAC secret, set it both here and in ServiceNow system property x_cribl.hmac_secret
+  4. Adjust the filter condition to control which events flow to ServiceNow
+  5. Test with a single event before enabling full flow

@@ -1,14 +1,13 @@
 {
-  "name": "cribl-upwind-rest-io",
+  "name": "cribl-servicenow-alert-intel",
   "version": "1.0.0",
-  "minLogStreamVersion": "4.17.0",
-  "author": "Cribl Packs Team",
-  "description": "Collector pack to process data from the Upwind Security REST API.",
-  "displayName": "Upwind Security Rest Collector IO",
+  "author": "Cribl",
+  "description": "ServiceNow App Engine application that ingests enriched security events from Cribl Stream, deduplicates issues, scores impact, and routes cases to resolver groups.",
+  "displayName": "Cribl Alert Intelligence for ServiceNow",
+  "license": "Apache-2.0",
   "tags": {
-    "streamtags": ["upwind", "security", "cnapp"],
-    "dataType": ["logs"],
-    "useCase": ["reduction", "routing"]
-  },
-  "exports": []
+    "streamtags": ["servicenow", "security", "itsm", "cribl"],
+    "dataType": ["alerts", "threats", "vulnerabilities"],
+    "useCase": ["case-management", "deduplication", "routing", "escalation"]
+  }
 }

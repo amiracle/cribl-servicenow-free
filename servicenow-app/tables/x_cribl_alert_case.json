@@ -1,0 +1,169 @@
+{
+  "name": "x_cribl_alert_case",
+  "label": "Cribl Alert Case",
+  "plural_label": "Cribl Alert Cases",
+  "extends": "task",
+  "number_prefix": "CRIBL",
+  "auto_number": true,
+  "columns": [
+    {
+      "name": "source_id",
+      "label": "Source ID",
+      "type": "string",
+      "max_length": 256,
+      "mandatory": true,
+      "read_only": true,
+      "description": "Original identifier from the source system (alertId, threatId, cveId)"
+    },
+    {
+      "name": "source_type",
+      "label": "Source Type",
+      "type": "choice",
+      "choices": [
+        { "value": "alert", "label": "Security Alert" },
+        { "value": "threat", "label": "Runtime Threat" },
+        { "value": "vulnerability", "label": "Vulnerability" }
+      ],
+      "mandatory": true
+    },
+    {
+      "name": "severity",
+      "label": "Severity",
+      "type": "integer",
+      "choices": [
+        { "value": 1, "label": "Critical" },
+        { "value": 2, "label": "High" },
+        { "value": 3, "label": "Medium" },
+        { "value": 4, "label": "Low" },
+        { "value": 5, "label": "Informational" }
+      ],
+      "default": 3
+    },
+    {
+      "name": "impact_score",
+      "label": "Impact Score",
+      "type": "integer",
+      "min_value": 0,
+      "max_value": 100,
+      "default": 0,
+      "description": "Computed composite impact score (0-100)"
+    },
+    {
+      "name": "resource_id",
+      "label": "Resource ID",
+      "type": "string",
+      "max_length": 512,
+      "description": "Identifier of the affected cloud resource"
+    },
+    {
+      "name": "resource_type",
+      "label": "Resource Type",
+      "type": "string",
+      "max_length": 128,
+      "description": "Type of cloud resource (Container, Pod, Node, Function, etc.)"
+    },
+    {
+      "name": "cloud_provider",
+      "label": "Cloud Provider",
+      "type": "choice",
+      "choices": [
+        { "value": "aws", "label": "AWS" },
+        { "value": "gcp", "label": "GCP" },
+        { "value": "azure", "label": "Azure" },
+        { "value": "other", "label": "Other" }
+      ]
+    },
+    {
+      "name": "region",
+      "label": "Region",
+      "type": "string",
+      "max_length": 64
+    },
+    {
+      "name": "cluster",
+      "label": "Cluster",
+      "type": "string",
+      "max_length": 256
+    },
+    {
+      "name": "dedup_key",
+      "label": "Deduplication Key",
+      "type": "string",
+      "max_length": 128,
+      "unique": true,
+      "read_only": true,
+      "description": "SHA-256 hash used for event deduplication"
+    },
+    {
+      "name": "occurrence_count",
+      "label": "Occurrence Count",
+      "type": "integer",
+      "default": 1,
+      "description": "Number of times this event pattern has been seen"
+    },
+    {
+      "name": "first_seen",
+      "label": "First Seen",
+      "type": "glide_date_time",
+      "read_only": true
+    },
+    {
+      "name": "last_seen",
+      "label": "Last Seen",
+      "type": "glide_date_time"
+    },
+    {
+      "name": "cribl_raw_payload",
+      "label": "Raw Payload",
+      "type": "json",
+      "max_length": 65536,
+      "description": "Original JSON payload from Cribl for audit purposes"
+    },
+    {
+      "name": "environment",
+      "label": "Environment",
+      "type": "choice",
+      "choices": [
+        { "value": "production", "label": "Production" },
+        { "value": "staging", "label": "Staging" },
+        { "value": "development", "label": "Development" },
+        { "value": "unknown", "label": "Unknown" }
+      ],
+      "default": "unknown"
+    },
+    {
+      "name": "cve_id",
+      "label": "CVE ID",
+      "type": "string",
+      "max_length": 20,
+      "description": "CVE identifier if source_type is vulnerability"
+    },
+    {
+      "name": "cvss_score",
+      "label": "CVSS Score",
+      "type": "decimal",
+      "description": "CVSS score for vulnerability-type cases"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx_dedup_key",
+      "columns": ["dedup_key"],
+      "unique": true
+    },
+    {
+      "name": "idx_source_lookup",
+      "columns": ["source_type", "source_id"]
+    },
+    {
+      "name": "idx_impact_state",
+      "columns": ["impact_score", "state"]
+    }
+  ],
+  "acls": {
+    "create": ["x_cribl_alert_intel.admin", "x_cribl_alert_intel.api"],
+    "read": ["x_cribl_alert_intel.admin", "x_cribl_alert_intel.analyst", "x_cribl_alert_intel.api"],
+    "write": ["x_cribl_alert_intel.admin", "x_cribl_alert_intel.analyst"],
+    "delete": ["x_cribl_alert_intel.admin"]
+  }
+}

@@ -1,0 +1,185 @@
+{
+  "name": "Cribl Alert Intelligence Dashboard",
+  "scope": "x_cribl_alert_intel",
+  "type": "workspace",
+  "description": "Operational dashboard for monitoring and triaging Cribl security alert cases",
+  "roles": ["x_cribl_alert_intel.admin", "x_cribl_alert_intel.analyst"],
+  "layout": {
+    "type": "grid",
+    "columns": 12,
+    "rows": "auto"
+  },
+  "widgets": [
+    {
+      "id": "kpi_open_cases",
+      "type": "scorecard",
+      "title": "Open Cases",
+      "position": { "col": 1, "row": 1, "width": 3, "height": 2 },
+      "config": {
+        "table": "x_cribl_alert_case",
+        "aggregate": "COUNT",
+        "condition": "state != 7 AND state != 8",
+        "thresholds": [
+          { "value": 0, "color": "green" },
+          { "value": 10, "color": "yellow" },
+          { "value": 50, "color": "orange" },
+          { "value": 100, "color": "red" }
+        ]
+      }
+    },
+    {
+      "id": "kpi_critical_cases",
+      "type": "scorecard",
+      "title": "Critical (Score 80+)",
+      "position": { "col": 4, "row": 1, "width": 3, "height": 2 },
+      "config": {
+        "table": "x_cribl_alert_case",
+        "aggregate": "COUNT",
+        "condition": "impact_score >= 80 AND state != 7 AND state != 8",
+        "thresholds": [
+          { "value": 0, "color": "green" },
+          { "value": 1, "color": "orange" },
+          { "value": 5, "color": "red" }
+        ]
+      }
+    },
+    {
+      "id": "kpi_today_ingested",
+      "type": "scorecard",
+      "title": "Ingested Today",
+      "position": { "col": 7, "row": 1, "width": 3, "height": 2 },
+      "config": {
+        "table": "x_cribl_event_log",
+        "aggregate": "COUNT",
+        "condition": "received_at >= javascript:gs.beginningOfToday()"
+      }
+    },
+    {
+      "id": "kpi_dedup_rate",
+      "type": "scorecard",
+      "title": "Dedup Rate (7d)",
+      "position": { "col": 10, "row": 1, "width": 3, "height": 2 },
+      "config": {
+        "type": "formula",
+        "formula": "ROUND((1 - COUNT(x_cribl_alert_case WHERE sys_created_on >= gs.daysAgo(7)) / COUNT(x_cribl_event_log WHERE received_at >= gs.daysAgo(7))) * 100)",
+        "suffix": "%",
+        "description": "Percentage of events deduplicated vs new cases"
+      }
+    },
+    {
+      "id": "chart_severity_breakdown",
+      "type": "donut_chart",
+      "title": "Open Cases by Severity",
+      "position": { "col": 1, "row": 3, "width": 4, "height": 4 },
+      "config": {
+        "table": "x_cribl_alert_case",
+        "group_by": "severity",
+        "aggregate": "COUNT",
+        "condition": "state != 7 AND state != 8",
+        "colors": {
+          "1": "#d32f2f",
+          "2": "#f57c00",
+          "3": "#fbc02d",
+          "4": "#388e3c",
+          "5": "#1976d2"
+        }
+      }
+    },
+    {
+      "id": "chart_source_type",
+      "type": "bar_chart",
+      "title": "Cases by Source Type",
+      "position": { "col": 5, "row": 3, "width": 4, "height": 4 },
+      "config": {
+        "table": "x_cribl_alert_case",
+        "group_by": "source_type",
+        "aggregate": "COUNT",
+        "condition": "state != 7 AND state != 8",
+        "orientation": "horizontal"
+      }
+    },
+    {
+      "id": "chart_trend",
+      "type": "line_chart",
+      "title": "Case Volume (30 days)",
+      "position": { "col": 9, "row": 3, "width": 4, "height": 4 },
+      "config": {
+        "table": "x_cribl_alert_case",
+        "group_by": "sys_created_on",
+        "aggregate": "COUNT",
+        "time_range": "30d",
+        "granularity": "day",
+        "series": [
+          { "label": "Created", "condition": "" },
+          { "label": "Closed", "condition": "state == 7" }
+        ]
+      }
+    },
+    {
+      "id": "list_critical",
+      "type": "data_table",
+      "title": "Critical Cases Requiring Action",
+      "position": { "col": 1, "row": 7, "width": 12, "height": 5 },
+      "config": {
+        "table": "x_cribl_alert_case",
+        "condition": "impact_score >= 50 AND state != 7 AND state != 8",
+        "order_by": "impact_score DESC",
+        "columns": [
+          "number",
+          "short_description",
+          "severity",
+          "impact_score",
+          "source_type",
+          "cloud_provider",
+          "environment",
+          "occurrence_count",
+          "assignment_group",
+          "state",
+          "last_seen"
+        ],
+        "row_limit": 25,
+        "row_color_field": "severity",
+        "row_colors": {
+          "1": "#ffebee",
+          "2": "#fff3e0"
+        }
+      }
+    },
+    {
+      "id": "chart_cloud_distribution",
+      "type": "pie_chart",
+      "title": "Cases by Cloud Provider",
+      "position": { "col": 1, "row": 12, "width": 4, "height": 4 },
+      "config": {
+        "table": "x_cribl_alert_case",
+        "group_by": "cloud_provider",
+        "aggregate": "COUNT",
+        "condition": "sys_created_on >= javascript:gs.daysAgo(30)"
+      }
+    },
+    {
+      "id": "chart_environment",
+      "type": "bar_chart",
+      "title": "Cases by Environment",
+      "position": { "col": 5, "row": 12, "width": 4, "height": 4 },
+      "config": {
+        "table": "x_cribl_alert_case",
+        "group_by": "environment",
+        "aggregate": "COUNT",
+        "condition": "state != 7 AND state != 8"
+      }
+    },
+    {
+      "id": "chart_mttr",
+      "type": "scorecard",
+      "title": "Avg Time to Resolve (7d)",
+      "position": { "col": 9, "row": 12, "width": 4, "height": 4 },
+      "config": {
+        "type": "formula",
+        "formula": "AVG(business_duration WHERE state == 7 AND sys_updated_on >= gs.daysAgo(7))",
+        "format": "duration",
+        "description": "Mean time from case creation to resolution"
+      }
+    }
+  ]
+}

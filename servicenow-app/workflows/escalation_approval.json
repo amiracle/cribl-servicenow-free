@@ -1,0 +1,141 @@
+{
+  "name": "Cribl Alert Escalation with Approval",
+  "scope": "x_cribl_alert_intel",
+  "description": "Escalation workflow requiring manager approval before promoting to P1 incident",
+  "active": true,
+  "trigger": {
+    "type": "record",
+    "table": "x_cribl_alert_case",
+    "condition": "(impact_score >= 80 AND state == 2 AND sys_updated_on <= gs.minutesAgo(30)) OR (sla_breached == true AND state != 6 AND state != 7)",
+    "operation": "update"
+  },
+  "stages": [
+    {
+      "name": "Check Escalation Eligibility",
+      "type": "decision",
+      "description": "Verify case hasn't already been escalated",
+      "branches": [
+        {
+          "name": "Already Escalated",
+          "condition": "trigger.priority == 1 AND trigger.work_notes CONTAINS 'Escalation approved'",
+          "next": "End - Already Handled"
+        },
+        {
+          "name": "Needs Escalation",
+          "condition": "true",
+          "next": "Request Approval"
+        }
+      ]
+    },
+    {
+      "name": "Request Approval",
+      "type": "approval",
+      "description": "Request security lead approval for incident escalation",
+      "config": {
+        "approvers": {
+          "type": "group_manager",
+          "group": "trigger.assignment_group"
+        },
+        "fallback_approver": {
+          "type": "role",
+          "role": "x_cribl_alert_intel.admin"
+        },
+        "due_date_offset": "15m",
+        "auto_approve_on_timeout": true,
+        "approval_message": {
+          "subject": "[Approval Required] Escalate Cribl Alert ${trigger.number} to P1 Incident",
+          "body": "A critical alert case requires escalation to P1 incident status.\n\n**Case Details:**\n- Number: ${trigger.number}\n- Title: ${trigger.short_description}\n- Impact Score: ${trigger.impact_score}/100\n- Severity: ${trigger.severity}\n- Source Type: ${trigger.source_type}\n- Resource: ${trigger.resource_id} (${trigger.resource_type})\n- Cloud: ${trigger.cloud_provider} / ${trigger.region}\n- Occurrences: ${trigger.occurrence_count}\n- First Seen: ${trigger.first_seen}\n- Last Seen: ${trigger.last_seen}\n\n**Proposed Action:**\nCreate a P1 Incident record and notify the Incident Management team.\n\nPlease approve or reject within 15 minutes. Auto-approval will occur on timeout."
+        }
+      },
+      "outcomes": {
+        "approved": "Create Incident",
+        "rejected": "Log Rejection"
+      }
+    },
+    {
+      "name": "Create Incident",
+      "type": "action_group",
+      "actions": [
+        {
+          "type": "create_record",
+          "table": "incident",
+          "values": {
+            "short_description": "[Escalated] ${trigger.short_description}",
+            "description": "Escalated from Cribl Alert Intelligence case ${trigger.number}.\n\nImpact Score: ${trigger.impact_score}\nSource: ${trigger.source_type}\nResource: ${trigger.resource_id}\nOccurrences: ${trigger.occurrence_count}\n\nOriginal Description:\n${trigger.description}",
+            "priority": 1,
+            "impact": 1,
+            "urgency": 1,
+            "category": "Security",
+            "subcategory": "Cloud Security",
+            "assignment_group": "trigger.assignment_group",
+            "caller_id": "system",
+            "correlation_id": "trigger.number"
+          },
+          "output_variable": "incident_record"
+        },
+        {
+          "type": "update_record",
+          "table": "x_cribl_alert_case",
+          "sys_id": "trigger.sys_id",
+          "values": {
+            "priority": 1,
+            "work_notes": "Escalation approved. Created P1 Incident: ${incident_record.number}. Incident Management team has been notified.",
+            "state": 2
+          }
+        },
+        {
+          "type": "notification",
+          "recipients": {
+            "type": "group",
+            "value": "Incident Management"
+          },
+          "subject": "[P1 INCIDENT] ${incident_record.number} - Escalated from Cribl Alert ${trigger.number}",
+          "body": "A P1 incident has been created from an escalated Cribl security alert.\n\nIncident: ${incident_record.number}\nOriginal Alert Case: ${trigger.number}\nImpact Score: ${trigger.impact_score}\n\nImmediate response required.",
+          "channel": "email"
+        },
+        {
+          "type": "notification",
+          "recipients": {
+            "type": "group",
+            "value": "Incident Management"
+          },
+          "subject": "P1 INCIDENT: ${incident_record.number}",
+          "body": "Escalated from Cribl Alert ${trigger.number} | Score: ${trigger.impact_score} | ${trigger.short_description}",
+          "channel": "pagerduty",
+          "config": {
+            "integration_key_property": "x_cribl.pagerduty_integration_key",
+            "severity": "critical"
+          }
+        }
+      ],
+      "next": "End - Escalated"
+    },
+    {
+      "name": "Log Rejection",
+      "type": "action_group",
+      "actions": [
+        {
+          "type": "update_record",
+          "table": "x_cribl_alert_case",
+          "sys_id": "trigger.sys_id",
+          "values": {
+            "work_notes": "Escalation to P1 Incident was rejected by approver. Case remains at current priority. Review reason and determine if further action is needed."
+          }
+        }
+      ],
+      "next": "End - Rejected"
+    },
+    {
+      "name": "End - Escalated",
+      "type": "end"
+    },
+    {
+      "name": "End - Rejected",
+      "type": "end"
+    },
+    {
+      "name": "End - Already Handled",
+      "type": "end"
+    }
+  ]
+}

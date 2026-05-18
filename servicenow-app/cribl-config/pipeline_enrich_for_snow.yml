@@ -1,0 +1,141 @@
+id: enrich_for_servicenow
+description: >
+  Pipeline to transform Cribl-normalized security events into the schema
+  expected by the ServiceNow Cribl Alert Intelligence ingest API.
+  Apply this pipeline before the ServiceNow webhook destination.
+
+functions:
+  - id: comment
+    filter: "true"
+    disabled: false
+    conf:
+      comment: >
+        This pipeline maps upstream event fields (Upwind, etc.) into the
+        normalized schema that the ServiceNow Cribl Alert Intelligence
+        app expects. It also adds dedup hints and trims large fields.
+
+  - id: eval
+    filter: "true"
+    disabled: false
+    description: "Normalize severity to uppercase string"
+    conf:
+      add:
+        - name: severity
+          value: "(severity || 'MEDIUM').toString().toUpperCase()"
+
+  - id: eval
+    filter: "true"
+    disabled: false
+    description: "Map source type from pack metadata"
+    conf:
+      add:
+        - name: source_type
+          value: >
+            __packsource && __packsource.includes('alert') ? 'alert' :
+            __packsource && __packsource.includes('threat') ? 'threat' :
+            __packsource && __packsource.includes('vulnerabilit') ? 'vulnerability' :
+            sourcetype && sourcetype.includes('alert') ? 'alert' :
+            sourcetype && sourcetype.includes('threat') ? 'threat' :
+            sourcetype && sourcetype.includes('vulnerabilit') ? 'vulnerability' :
+            'alert'
+
+  - id: eval
+    filter: "true"
+    disabled: false
+    description: "Ensure required ID fields exist"
+    conf:
+      add:
+        - name: alertId
+          value: "alertId || threatId || vulnerabilityId || cveId || `auto_${Date.now()}_${Math.random().toString(36).slice(2,8)}`"
+
+  - id: eval
+    filter: "source_type === 'vulnerability'"
+    disabled: false
+    description: "Normalize vulnerability-specific fields"
+    conf:
+      add:
+        - name: cveId
+          value: "cveId || ''"
+        - name: cvssScore
+          value: "cvssScore ? parseFloat(cvssScore) : 0"
+
+  - id: eval
+    filter: "true"
+    disabled: false
+    description: "Normalize cloud provider to lowercase"
+    conf:
+      add:
+        - name: cloudProvider
+          value: "(cloudProvider || cloud_provider || 'other').toString().toLowerCase()"
+
+  - id: eval
+    filter: "true"
+    disabled: false
+    description: "Add environment tag from labels/tags if available"
+    conf:
+      add:
+        - name: environment
+          value: >
+            (tags && tags.environment) ? tags.environment :
+            (labels && labels.environment) ? labels.environment :
+            (labels && labels.env) ? labels.env :
+            (namespace && namespace.includes('prod')) ? 'production' :
+            (namespace && namespace.includes('stag')) ? 'staging' :
+            'unknown'
+
+  - id: eval
+    filter: "true"
+    disabled: false
+    description: "Add Cribl enrichment metadata"
+    conf:
+      add:
+        - name: _cribl_enriched_at
+          value: "new Date().toISOString()"
+        - name: _cribl_pipeline
+          value: "'enrich_for_servicenow'"
+        - name: _cribl_worker
+          value: "C.os.hostname()"
+
+  - id: eval
+    filter: "true"
+    disabled: false
+    description: "Trim description to 4000 chars to fit ServiceNow field limits"
+    conf:
+      add:
+        - name: description
+          value: "description ? description.toString().substring(0, 4000) : ''"
+
+  - id: serialize
+    filter: "true"
+    disabled: false
+    description: "Remove internal/unnecessary fields before sending to ServiceNow"
+    conf:
+      type: json
+      dstField: __raw
+      fields:
+        - "!_*"
+        - "!__*"
+        - "!cribl_*"
+        - "!index"
+        - "!sourcetype"
+        - "!_time"
+        - "!__packsource"
+        - "*"
+
+  - id: eval
+    filter: "true"
+    disabled: false
+    description: "Keep only the fields ServiceNow needs"
+    conf:
+      remove:
+        - "_*"
+        - "__*"
+        - "cribl_*"
+        - "index"
+        - "sourcetype"
+
+groups: {}
+
+asyncFuncTimeout: 1000
+output: default
+streamtags: []

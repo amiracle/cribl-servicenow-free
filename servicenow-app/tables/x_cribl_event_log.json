@@ -1,0 +1,66 @@
+{
+  "name": "x_cribl_event_log",
+  "label": "Cribl Event Log",
+  "plural_label": "Cribl Event Logs",
+  "columns": [
+    {
+      "name": "alert_case",
+      "label": "Alert Case",
+      "type": "reference",
+      "reference_table": "x_cribl_alert_case",
+      "mandatory": true,
+      "description": "Parent alert case this event belongs to"
+    },
+    {
+      "name": "payload",
+      "label": "Event Payload",
+      "type": "json",
+      "max_length": 65536,
+      "mandatory": true,
+      "description": "Full JSON event payload received from Cribl"
+    },
+    {
+      "name": "received_at",
+      "label": "Received At",
+      "type": "glide_date_time",
+      "mandatory": true,
+      "default": "javascript:gs.nowDateTime()"
+    },
+    {
+      "name": "processed",
+      "label": "Processed",
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this event has been fully processed"
+    },
+    {
+      "name": "source_type",
+      "label": "Source Type",
+      "type": "string",
+      "max_length": 32
+    },
+    {
+      "name": "processing_notes",
+      "label": "Processing Notes",
+      "type": "string",
+      "max_length": 1024,
+      "description": "Notes from processing (e.g., deduplicated, new case created)"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx_case_received",
+      "columns": ["alert_case", "received_at"]
+    },
+    {
+      "name": "idx_unprocessed",
+      "columns": ["processed", "received_at"]
+    }
+  ],
+  "acls": {
+    "create": ["x_cribl_alert_intel.api"],
+    "read": ["x_cribl_alert_intel.admin", "x_cribl_alert_intel.analyst"],
+    "write": ["x_cribl_alert_intel.admin"],
+    "delete": ["x_cribl_alert_intel.admin"]
+  }
+}

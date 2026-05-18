@@ -1,0 +1,109 @@
+{
+  "app_id": "x_cribl_alert_intel",
+  "name": "Cribl Alert Intelligence",
+  "version": "1.0.0",
+  "vendor": "Cribl",
+  "vendor_prefix": "x_cribl",
+  "description": "Ingests enriched security alerts from Cribl Stream, deduplicates issues, scores likely impact, and routes cases to the appropriate resolver group.",
+  "logo": "images/cribl_logo.png",
+  "minimum_servicenow_version": "Vancouver",
+  "license": "Apache-2.0",
+  "scope": "x_cribl_alert_intel",
+  "dependencies": {
+    "com.glideapp.workflow": ">=1.0.0"
+  },
+  "components": {
+    "tables": [
+      "x_cribl_alert_case",
+      "x_cribl_event_log",
+      "x_cribl_routing_rules"
+    ],
+    "scripted_rest_apis": [
+      {
+        "name": "Cribl Ingest API",
+        "namespace": "x_cribl",
+        "version": "v1",
+        "resources": [
+          {
+            "name": "ingest",
+            "http_method": "POST",
+            "relative_path": "/ingest",
+            "script": "scripts/CriblEventProcessor.js"
+          }
+        ]
+      }
+    ],
+    "script_includes": [
+      "ImpactScorer",
+      "CaseRouter",
+      "DeduplicationEngine"
+    ],
+    "business_rules": [
+      {
+        "name": "Cribl Alert Deduplication",
+        "table": "x_cribl_alert_case",
+        "when": "before",
+        "insert": true,
+        "update": false
+      }
+    ],
+    "scheduled_jobs": [
+      {
+        "name": "Cribl Auto-Close Stale Cases",
+        "script": "scripts/AutoCloseStale.js",
+        "schedule": "0 2 * * *",
+        "description": "Closes informational cases older than 7 days with no activity"
+      }
+    ],
+    "flows": [
+      "cribl_alert_triage",
+      "escalation_approval"
+    ],
+    "dashboards": [
+      "cribl_alert_dashboard"
+    ],
+    "service_portal_widgets": [
+      "cribl_alert_status"
+    ]
+  },
+  "roles": [
+    {
+      "name": "x_cribl_alert_intel.admin",
+      "description": "Full administrative access to Cribl Alert Intelligence"
+    },
+    {
+      "name": "x_cribl_alert_intel.analyst",
+      "description": "Can view, triage, and resolve alert cases"
+    },
+    {
+      "name": "x_cribl_alert_intel.api",
+      "description": "Service account role for Cribl ingest API access"
+    }
+  ],
+  "system_properties": [
+    {
+      "name": "x_cribl.dedup_window_hours",
+      "type": "integer",
+      "default": 4,
+      "description": "Time window in hours for event deduplication"
+    },
+    {
+      "name": "x_cribl.auto_close_days",
+      "type": "integer",
+      "default": 7,
+      "description": "Days after which informational cases are auto-closed"
+    },
+    {
+      "name": "x_cribl.escalation_threshold",
+      "type": "integer",
+      "default": 80,
+      "description": "Impact score threshold for automatic escalation"
+    },
+    {
+      "name": "x_cribl.hmac_secret",
+      "type": "password2",
+      "default": "",
+      "description": "Shared HMAC secret for authenticating Cribl webhook requests"
+    }
+  ]
+}

@@ -1,0 +1,154 @@
+{
+  "name": "Cribl Alert Triage",
+  "scope": "x_cribl_alert_intel",
+  "description": "Automated triage workflow for new Cribl alert cases with impact score >= 50",
+  "active": true,
+  "trigger": {
+    "type": "record",
+    "table": "x_cribl_alert_case",
+    "condition": "impact_score >= 50 AND state == 1",
+    "operation": "insert"
+  },
+  "stages": [
+    {
+      "name": "Classify Priority",
+      "type": "decision",
+      "description": "Determine handling path based on impact score band",
+      "branches": [
+        {
+          "name": "Critical (80-100)",
+          "condition": "trigger.impact_score >= 80",
+          "next": "Escalate Immediately"
+        },
+        {
+          "name": "Standard (50-79)",
+          "condition": "trigger.impact_score >= 50 AND trigger.impact_score < 80",
+          "next": "Standard Assignment"
+        }
+      ]
+    },
+    {
+      "name": "Escalate Immediately",
+      "type": "action_group",
+      "actions": [
+        {
+          "type": "update_record",
+          "table": "x_cribl_alert_case",
+          "sys_id": "trigger.sys_id",
+          "values": {
+            "state": 2,
+            "priority": 1,
+            "work_notes": "Auto-escalated: Impact score ${trigger.impact_score} exceeds critical threshold (80). Immediate response required."
+          }
+        },
+        {
+          "type": "notification",
+          "recipients": {
+            "type": "group",
+            "value": "trigger.assignment_group"
+          },
+          "subject": "[CRITICAL] Cribl Alert: ${trigger.short_description}",
+          "body": "A critical security alert has been auto-escalated.\n\nCase: ${trigger.number}\nSeverity: ${trigger.severity}\nImpact Score: ${trigger.impact_score}\nSource: ${trigger.source_type}\nResource: ${trigger.resource_id}\nEnvironment: ${trigger.environment}\n\nThis case requires immediate attention. SLA timer has started.",
+          "channel": "email"
+        },
+        {
+          "type": "notification",
+          "recipients": {
+            "type": "group",
+            "value": "trigger.assignment_group"
+          },
+          "subject": "Critical Cribl Alert: ${trigger.number}",
+          "body": "Impact Score: ${trigger.impact_score} | ${trigger.short_description} | Resource: ${trigger.resource_id}",
+          "channel": "slack",
+          "config": {
+            "webhook_property": "x_cribl.slack_webhook_url"
+          }
+        },
+        {
+          "type": "set_sla",
+          "sla_definition": "cribl_critical_response",
+          "target_duration": "30m",
+          "breach_action": "escalation_approval"
+        }
+      ],
+      "next": "Monitor Resolution"
+    },
+    {
+      "name": "Standard Assignment",
+      "type": "action_group",
+      "actions": [
+        {
+          "type": "update_record",
+          "table": "x_cribl_alert_case",
+          "sys_id": "trigger.sys_id",
+          "values": {
+            "state": 2,
+            "priority": 2,
+            "work_notes": "Auto-assigned: Impact score ${trigger.impact_score}. Standard priority handling."
+          }
+        },
+        {
+          "type": "notification",
+          "recipients": {
+            "type": "group",
+            "value": "trigger.assignment_group"
+          },
+          "subject": "[Action Required] Cribl Alert: ${trigger.short_description}",
+          "body": "A new security alert case has been assigned to your group.\n\nCase: ${trigger.number}\nSeverity: ${trigger.severity}\nImpact Score: ${trigger.impact_score}\nSource: ${trigger.source_type}\nResource: ${trigger.resource_id}\n\nPlease review and begin triage.",
+          "channel": "email"
+        },
+        {
+          "type": "set_sla",
+          "sla_definition": "cribl_standard_response",
+          "target_duration": "4h",
+          "breach_action": "escalation_approval"
+        }
+      ],
+      "next": "Monitor Resolution"
+    },
+    {
+      "name": "Monitor Resolution",
+      "type": "wait",
+      "condition": "trigger.state == 6 OR trigger.state == 7",
+      "timeout": "24h",
+      "timeout_action": "SLA Breach Check"
+    },
+    {
+      "name": "SLA Breach Check",
+      "type": "decision",
+      "branches": [
+        {
+          "name": "Resolved",
+          "condition": "trigger.state == 6 OR trigger.state == 7",
+          "next": "Complete"
+        },
+        {
+          "name": "Still Open",
+          "condition": "trigger.state != 6 AND trigger.state != 7",
+          "next": "Notify Manager"
+        }
+      ]
+    },
+    {
+      "name": "Notify Manager",
+      "type": "action_group",
+      "actions": [
+        {
+          "type": "notification",
+          "recipients": {
+            "type": "group_manager",
+            "value": "trigger.assignment_group"
+          },
+          "subject": "[Overdue] Cribl Alert Case ${trigger.number} exceeds SLA",
+          "body": "Case ${trigger.number} has not been resolved within the expected SLA.\n\nAge: 24+ hours\nImpact Score: ${trigger.impact_score}\nAssigned Group: ${trigger.assignment_group}\n\nPlease review and take action.",
+          "channel": "email"
+        }
+      ],
+      "next": "Complete"
+    },
+    {
+      "name": "Complete",
+      "type": "end"
+    }
+  ]
+}
