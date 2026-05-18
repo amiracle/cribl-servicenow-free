@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_package_dependency_m2m">
+    <sys_package_dependency_m2m action="INSERT_OR_UPDATE">
+        <dependency display_value="Flow Designer - Health Check Tool" source="com.glide.hub.flow_health_check_tool">272e9cecf50803100a22c0b3dfa15183</dependency>
+        <min_version>1.0.0</min_version>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-05-18 19:29:44</sys_created_on>
+        <sys_id>724ca5b30f7083100868bbc530d1b29e</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_package display_value="Cribl Alert Intel App for ServiceNow" source="x_1596414_cribl_0">41eae17b0f3083100868bbc530d1b289</sys_package>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-05-18 19:29:44</sys_updated_on>
+    </sys_package_dependency_m2m>
+</record_update>
