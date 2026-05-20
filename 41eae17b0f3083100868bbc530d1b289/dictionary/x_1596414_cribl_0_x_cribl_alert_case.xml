@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="94f3fd7b0f3483100868bbc530d1b283" label="Cribl Alert Case" max_length="40" name="x_1596414_cribl_0_x_cribl_alert_case" type="collection">
+        <element label="Sevrity" max_length="40" name="sevrity" type="integer"/>
+        <element label="Source ID" max_length="256" name="source_id" type="string"/>
+        <element choice="3" label="Source Type" max_length="40" name="source_type" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="threat=Runtime Threat" sequence="1" value="threat_runtime_threat"/>
+                <element inactive_on_update="false" label="alert=Security Alert" sequence="0" value="alert_security_alert"/>
+                <element inactive_on_update="false" label="vulnerability=Vulnerability" sequence="2" value="vulnerability_vulnerability"/>
+            </choice>
+        </element>
+        <index name="index3">
+            <element name="source_id"/>
+        </index>
+        <index name="index4">
+            <element name="source_type"/>
+        </index>
+    </element>
+</database>

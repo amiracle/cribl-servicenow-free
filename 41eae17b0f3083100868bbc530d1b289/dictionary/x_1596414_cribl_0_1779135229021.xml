@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="8166bdf70f7483100868bbc530d1b28a" extends="sys_import_set_row" label="Cribl 0 1779135229021" max_length="40" name="x_1596414_cribl_0_1779135229021" type="collection">
+        <element attributes="edge_encryption_enabled=true,import_attribute_name=Reference to: x_cribl_alert_case. Mandatory" label="Reference to: x_cribl_alert_case. Mandatory" max_length="47" name="u_reference_to_ase__mandatory" type="string"/>
+        <element attributes="edge_encryption_enabled=true,import_attribute_name=—" label="—" max_length="40" name="u__" type="string"/>
+        <element attributes="edge_encryption_enabled=true,import_attribute_name=Reference" label="Reference" max_length="40" name="u_reference" type="string"/>
+        <element attributes="edge_encryption_enabled=true,import_attribute_name=Alert Case" label="Alert Case" max_length="40" name="u_alert_case" type="string"/>
+    </element>
+</database>
